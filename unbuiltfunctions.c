@@ -1,14 +1,4 @@
 /***********************************************************
- * IsGraphFull() - returns true if all rooms have 3 to 6 
- * outbound connections.
- ***********************************************************/ 
-bool IsGraphFull(){
-    int i;
-    for (i = 0; i < NUM_ROOMS; i++){
-
-    }
-}
-/***********************************************************
  * AddRandomConnection() - adds a random, valid outbound 
  * connection from a Room to another Room
  ***********************************************************/
@@ -31,13 +21,7 @@ void AddRandomConnection(){
     ConnectRoom(A, B);
     ConnectRoom(B, A);
 }
-/***********************************************************
- * GetRandomRoom() - returns a random room, but does not
- * validate if connection can be added
- ***********************************************************/
-Room GetRandomRoom(){
 
-}
 /***********************************************************
  * CanAddConnectionFrom() - returns true if a connection can
  * be added from Room B (< 6 outbound connections)

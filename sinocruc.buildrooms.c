@@ -21,9 +21,12 @@ char* rm_names[10] = {"thisroom", "LMNOP", "ThAtroom", "Empty", "KB824",
 void CreateRooms(Room* rooms);
 void DeleteRooms(Room* rooms); 
 void PrintRoomsInfo(Room* rooms);
-//bool IsGraphFull();
+void PrintRoom(Room* room);
+bool IsGraphFull(Room* rooms);
+Room* GetRandomRoom(Room* rooms);
+
 //void AddRandomConnection();
-//Room GetRandomRoom();
+
 //bool CanAddConnectionFrom(Room B);
 //bool ConnectionAlreadyExists(Room A, Room B);
 //void ConnectRoom(Room A, Room B);
@@ -44,10 +47,8 @@ int main(){
     srand(time(NULL));
     CreateRooms(rooms);
     PrintRoomsInfo(rooms);
-    //while (IsGraphFull() == false){
-    //    AddRandomConnection();
-    //}
-    //DeleteRooms(rooms);
+    Room* ptr = GetRandomRoom(rooms);
+    PrintRoom(ptr);
     return 0;
 }
 /***********************************************************
@@ -58,6 +59,8 @@ int main(){
 void CreateRooms(Room *rooms){
     int i = 0, name_index, j;
     while(i < NUM_ROOMS){
+        //initialize the number of connections to 0
+        rooms[i].connections = 0;
         //assign room types
         if(i == 0){
             rooms[i].room_type = "START_ROOM";
@@ -85,18 +88,46 @@ void CreateRooms(Room *rooms){
     }
 }
 /***********************************************************
- * DeleteRooms() - Clean up memory allocated for each room
- ***********************************************************/ 
-void DeleteRooms(Room *rooms){
-    
-}
-/***********************************************************
- * PrintRoomsInfo() - 
+ * PrintRoomsInfo() - iterates through the array of rooms
+ * and prints the room name, type, number of connections, 
+ * and rooms connected 
  ***********************************************************/ 
 void PrintRoomsInfo(Room* rooms){
     int i;
     for(i = 0; i < NUM_ROOMS; i++){
         printf("Room %d: %s\n", i+1, rooms[i].room_name);
-        printf("  Type: %s\n", rooms[i].room_type );
+        printf("  Type: %s\n", rooms[i].room_type);
+        printf("  Number Of Connections: %d\n", rooms[i].connections);
     }
+}
+/***********************************************************
+ * PrintRoom() - prints the info for the room passed to it
+ ***********************************************************/ 
+void PrintRoom(Room* room){
+    printf("Room: %s\n", room->room_name);
+    printf("  Type: %s\n", room->room_type);
+    printf("  Number Of Connections: %d\n", room->connections);
+}
+/***********************************************************
+ * IsGraphFull() - returns true if all rooms have 3 to 6 
+ * outbound connections.
+ ***********************************************************/ 
+bool IsGraphFull(Room* rooms){
+    int i;
+    for (i = 0; i < NUM_ROOMS; i++){
+        //if number of room connects are NOT >= 3 or <= 6
+        if(!(rooms[i].connections >= 3 && rooms[i].connections <= 6)){
+            return false;
+        }
+    }
+    return true;
+}
+/***********************************************************
+ * GetRandomRoom() - returns a random room, but does not
+ * validate if connection can be added
+ ***********************************************************/
+Room* GetRandomRoom(Room* rooms){
+    int room_number = rand() % NUM_ROOMS;
+    //return address to randomly picked room
+    return &rooms[room_number];
 }
