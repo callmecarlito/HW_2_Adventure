@@ -61,15 +61,12 @@ void CreateRooms(Room *rooms){
         //assign room types
         if(i == 0){
             rooms[i].room_type = "START_ROOM";
-            //strcpy(rooms[i].room_type, "START_ROOM");
         }
         else if(i == 1){
             rooms[i].room_type = "END_ROOM";
-            //strcpy(rooms[i].room_type, "END_ROOM");
         }
         else{
             rooms[i].room_type = "MID_ROOM";
-            //strcpy(rooms[i].room_type, "MID_ROOM");
         }
         //randomly select name from the list of names
         name_index = rand() % 10;
