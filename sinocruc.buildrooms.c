@@ -1,5 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <stdbool.h>
+#include <time.h>
 
 #define NUM_ROOMS 7
 #define MIN_CONNECT 3
@@ -9,15 +12,16 @@ typedef struct{
     char* room_name;
     char* room_type;
     int connections; 
-    Room connected_rooms[MAX_CONNECT]
+    struct Room* connected_rooms[MAX_CONNECT];
 } Room;
 
 char* rm_names[10] = {"thisroom", "LMNOP", "ThAtroom", "Empty", "KB824", 
                    "infinity", "remember", "SPAced", "dunGEON", "onlyRoom"};
 char* rm_types[3] = {"START_ROOM", "END_ROOM", "MID_ROOM"};
 
-Room* InitializeRooms();
-void DeleteRooms(Room *arrOfRooms); 
+void CreateRooms(Room* rooms);
+void DeleteRooms(Room* rooms); 
+void PrintRoomsInfo(Room* rooms);
 //bool IsGraphFull();
 //void AddRandomConnection();
 //Room GetRandomRoom();
@@ -26,41 +30,64 @@ void DeleteRooms(Room *arrOfRooms);
 //void ConnectRoom(Room A, Room B);
 //bool IsSameRoom(Room A, Room B);
 
-//reference for creating an array of pointers to structs:
-//https://stackoverflow.com/questions/15397728/c-pointer-to-array-of-pointers-to-structures-allocation-deallocation-issues
-//array for pointers to Room structs
+/* reference for creating an array of pointers to structs:
+ * https://stackoverflow.com/questions/15397728/c-pointer-to-array-of-pointers-to-structures-allocation-deallocation-issues
+ * array for pointers to Room structs
+ * 
+ * REMOVE REMOVE REMOVE ?????????
+ *
+ */
+
+//declare an array of rooms
+Room rooms[NUM_ROOMS];
 
 int main(){
-    //declare pointer to array and initialize and allocate memory for array
-    Room *(*rooms)[] = InitializeRooms();
+    srand(time(NULL));
+    CreateRooms(rooms);
+    PrintRoomsInfo(rooms);
     //while (IsGraphFull() == false){
     //    AddRandomConnection();
     //}
-    DeleteRooms(*rooms);
+    //DeleteRooms(rooms);
     return 0;
 }
 /***********************************************************
- * InitializeRooms() - initializes the array containing 
+ * CreateRooms() - initializes the array containing 
  * pointers to room structs and returns the pointer to that
  * array
  ***********************************************************/ 
-Room* InitializeRooms(){
-    int i;
-    //declare array of pointers to structs
-    Room *arrOfRooms[NUM_ROOMS];
-    //allocate and assign pointers to structs
-    for(i = 0; i < NUM_ROOMS; i++){
-        arrOfRooms[i] = malloc(sizeof(Room));
+void CreateRooms(Room *rooms){
+    int i = 0, name_index, j;
+    while(i < NUM_ROOMS){
+
+        //randomly select name from the list of names
+        name_index = rand() % 10;
+        //check name is not already in use
+        for(j = 0; j < i; j++){
+            //if name is in use
+            if(strcmp(rooms[j].room_name, rm_names[name_index]) == 0){
+                break;
+            }
+        }
+        //if j == i, means we have checked the entire list
+        if(j == i){
+            //assign name to the next room and increment i
+            rooms[i++].room_name = rm_names[name_index];
+        }
     }
-    //return pointer to array
-    return &arrOfRooms;
 }
 /***********************************************************
  * DeleteRooms() - Clean up memory allocated for each room
  ***********************************************************/ 
-void DeleteRooms(Room *arrOfRooms){
+void DeleteRooms(Room *rooms){
+    
+}
+/***********************************************************
+ * PrintRoomsInfo() - 
+ ***********************************************************/ 
+void PrintRoomsInfo(Room* rooms){
     int i;
     for(i = 0; i < NUM_ROOMS; i++){
-        free(arrOfRooms[i]);
+        printf("Room %d: %s\n", i+1, rooms[i].room_name);
     }
 }
