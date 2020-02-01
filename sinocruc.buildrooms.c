@@ -17,7 +17,6 @@ typedef struct{
 
 char* rm_names[10] = {"thisroom", "LMNOP", "ThAtroom", "Empty", "KB824", 
                    "infinity", "remember", "SPAced", "dunGEON", "onlyRoom"};
-char* rm_types[3] = {"START_ROOM", "END_ROOM", "MID_ROOM"};
 
 void CreateRooms(Room* rooms);
 void DeleteRooms(Room* rooms); 
@@ -59,7 +58,19 @@ int main(){
 void CreateRooms(Room *rooms){
     int i = 0, name_index, j;
     while(i < NUM_ROOMS){
-
+        //assign room types
+        if(i == 0){
+            rooms[i].room_type = "START_ROOM";
+            //strcpy(rooms[i].room_type, "START_ROOM");
+        }
+        else if(i == 1){
+            rooms[i].room_type = "END_ROOM";
+            //strcpy(rooms[i].room_type, "END_ROOM");
+        }
+        else{
+            rooms[i].room_type = "MID_ROOM";
+            //strcpy(rooms[i].room_type, "MID_ROOM");
+        }
         //randomly select name from the list of names
         name_index = rand() % 10;
         //check name is not already in use
@@ -89,5 +100,6 @@ void PrintRoomsInfo(Room* rooms){
     int i;
     for(i = 0; i < NUM_ROOMS; i++){
         printf("Room %d: %s\n", i+1, rooms[i].room_name);
+        printf("  Type: %s\n", rooms[i].room_type );
     }
 }
