@@ -38,7 +38,6 @@ int main(){
     srand(time(NULL));
     CreateRooms(rooms);
     PrintRoomsInfo(rooms);
-
     return 0;
 }
 /***********************************************************
@@ -71,7 +70,7 @@ void InitializeRooms(Room *rooms){
         }
         //if j == i, means we have checked the entire list
         if(j == i){
-            //assign name to the next room and increment i
+            //increment i and assign name to the next room
             rooms[i++].room_name = rm_names[name_index];
         }
     }
@@ -79,7 +78,7 @@ void InitializeRooms(Room *rooms){
 /***********************************************************
  * PrintRoomsInfo() - iterates through the array of rooms
  * and prints the room name, type, number of connections, 
- * and rooms connected 
+ * and rooms connected.  
  ***********************************************************/ 
 void PrintRoomsInfo(Room* rooms){
     int i, j;
@@ -143,6 +142,7 @@ bool CanAddConnectionFrom(Room* B){
 bool ConnectionAlreadyExists(Room* A, Room* B){
     int i;
     for(i = 0; i < A->connections; i++){
+        //compares the pointers to the of room B
         if(A->connected_rooms[i] == B){
             return true;
         }
@@ -153,6 +153,7 @@ bool ConnectionAlreadyExists(Room* A, Room* B){
  * ConnectRoom() - connects Room A to Room B
  ***********************************************************/
 void ConnectRoom(Room* A, Room* B){
+    //adds pointer for room B to the array for rooms connected to A
     A->connected_rooms[A->connections++] = B;
 }
 /***********************************************************
@@ -160,6 +161,7 @@ void ConnectRoom(Room* A, Room* B){
  * the same room
  ***********************************************************/
 bool IsSameRoom(Room* A, Room* B){
+    //compares to pointers of room A and B to see if they are the same
     if(A == B){
         return true;
     }
