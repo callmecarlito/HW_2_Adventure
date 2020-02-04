@@ -16,6 +16,7 @@ typedef struct Room{
     char* room_type;
     int connections; 
     struct Room* connected_rooms[MAX_CONNECT];
+    char* room_path;
 } Room;
 
 //list for name of rooms to be randomly selected from
@@ -35,8 +36,11 @@ void AddRandomConnection(Room* rooms);
 void CreateRooms(Room* rooms);
 
 void CreateRoomsDirectory(char* path_of_rooms_dir);
-void MakeFilePath(Room* rooms, char* path_of_rooms_dir);
-void CreateRoomFiles(Room* rooms);
+void AssignFilePaths(Room* rooms, char* path_of_rooms_dir);
+void MakeFiles(Room* rooms);
+void FreeAllocMem(Room* rooms);
+void CreateRoomFiles(Room* rooms, char* path_of_rooms_dir);
+
 
 //declare an array of rooms
 Room rooms[NUM_ROOMS];
@@ -46,7 +50,8 @@ char path_of_rooms_dir[128];
 int main(){
     srand(time(NULL));
     CreateRooms(rooms);
-    CreateRoomsDirectory(path_of_rooms_dir);
+    CreateRoomFiles(rooms, path_of_rooms_dir);
+    //PrintRoomsInfo(rooms);
     return 0;
 }
 /***********************************************************
@@ -92,9 +97,10 @@ void InitializeRooms(Room *rooms){
 void PrintRoomsInfo(Room* rooms){
     int i, j;
     for(i = 0; i < NUM_ROOMS; i++){
-        printf("Room %d: %s", i+1, rooms[i].room_name);
-        printf(" --- Type: %s", rooms[i].room_type);
-        printf(" --- Number Of Connections: %d\n", rooms[i].connections);
+        printf("Room %d: %s\n", i+1, rooms[i].room_name);
+        printf(" Type: %s\n", rooms[i].room_type);
+        printf(" Path: %s\n", rooms[i].room_path);
+        printf(" Number Of Connections: %d\n", rooms[i].connections);
         for(j = 0; j < rooms[i].connections; j++){
             printf("    [%d] %s\n", j+1, rooms[i].connected_rooms[j]->room_name);
         }
@@ -212,7 +218,8 @@ void CreateRooms(Room* rooms){
     }
 }
 /***********************************************************
- * CreateRoomsDirectory() -
+ * CreateRoomsDirectory() - creates directory for the room
+ * files and saves the path of the directory
  ***********************************************************/
 void CreateRoomsDirectory(char* path_of_rooms_dir){
     char pid_buffer[16];
@@ -225,18 +232,59 @@ void CreateRoomsDirectory(char* path_of_rooms_dir){
     //create actual directory for the room files
     int dir_success = mkdir(path_of_rooms_dir, 0755);
     if(dir_success != 0){
-        
+        printf("Error creating directory: %s\n", path_of_rooms_dir);
     }
 }
 /***********************************************************
- * MakeFilePath() - 
+ * AssignFilePaths() - Assigns file paths to each room
  ***********************************************************/
-void MakeFilePath(Room* rooms, char* path_of_rooms_dir){
+void AssignFilePaths(Room* rooms, char* path_of_rooms_dir){
+    int i;
+    for(i = 0; i < NUM_ROOMS; i++){
+        char* path = malloc(128*sizeof(char));
+        memset(path, '\0', sizeof(&path));
+        char pid_buffer[16];
+        memset(pid_buffer, '\0', sizeof(pid_buffer));
+
+        strcat(path, path_of_rooms_dir);
+        strcat(path, "/");
+        strcat(path, rooms[i].room_name);
+        strcat(path, "_room");
+
+        int length = strlen(path);
+        if(path[length-1] == '\n'){
+            path[length-1] = '0';
+            printf("\'\n\' removed \n");
+        }
+        rooms[i].room_path = path;
+    }
+}
+/***********************************************************
+ * MakeFiles() - makes the files  containing the information
+ * for each room
+ ***********************************************************/
+void MakeFiles(Room* rooms){
 
 }
 /***********************************************************
- * CreateRoomFiles() -
+ * FreeAllocMem() - frees memory for the file paths which
+ * were allocated in AssignFilePaths()
  ***********************************************************/
-void CreateRoomFiles(Room* rooms){
+void FreeAllocMem(Room* rooms){
+    int i;
+    for(i = 0; i < NUM_ROOMS; i++){
+        free(rooms[i].room_path);
+    }
+}
+/***********************************************************
+ * CreateRoomFiles()
+ ***********************************************************/
+void CreateRoomFiles(Room* rooms, char* path_of_rooms_dir){
+    CreateRoomsDirectory(path_of_rooms_dir);
+    AssignFilePaths(rooms, path_of_rooms_dir);
+    MakeFiles(rooms);
 
+    PrintRoomsInfo(rooms);
+    
+    FreeAllocMem(rooms);
 }
