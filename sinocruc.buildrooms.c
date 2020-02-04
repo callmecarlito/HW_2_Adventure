@@ -264,7 +264,21 @@ void AssignFilePaths(Room* rooms, char* path_of_rooms_dir){
  * for each room
  ***********************************************************/
 void MakeFiles(Room* rooms){
-
+    int i, j;
+    for(i = 0; i < NUM_ROOMS; i++){
+        FILE* output_file = fopen(rooms[i].room_path, "w+");
+        if(output_file == NULL){
+            //ERROR HANDLING
+        }
+        else{
+            fprintf(output_file, "ROOM NAME: %s\n",rooms[i].room_name);
+            for(j = 0; j < rooms[i].connections; j++){
+                fprintf(output_file, "CONNECTION %d: %s\n", j+1, rooms[i].connected_rooms[j]->room_name);
+            }
+            fprintf(output_file, "ROOM TYPE: %s\n", rooms[i].room_type);
+            fclose(output_file);
+        }
+    }
 }
 /***********************************************************
  * FreeAllocMem() - frees memory for the file paths which
@@ -283,8 +297,5 @@ void CreateRoomFiles(Room* rooms, char* path_of_rooms_dir){
     CreateRoomsDirectory(path_of_rooms_dir);
     AssignFilePaths(rooms, path_of_rooms_dir);
     MakeFiles(rooms);
-
-    PrintRoomsInfo(rooms);
-    
     FreeAllocMem(rooms);
 }
