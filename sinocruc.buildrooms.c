@@ -15,30 +15,21 @@ typedef struct{
     struct Room* connected_rooms[MAX_CONNECT];
 } Room;
 
+//list for name of rooms to be randomly selected from
 char* rm_names[10] = {"thisroom", "LMNOP", "ThAtroom", "Empty", "KB824", 
                    "infinity", "remember", "SPAced", "dunGEON", "onlyRoom"};
 
-void CreateRooms(Room* rooms);
-void DeleteRooms(Room* rooms); 
+void InitializeRooms(Room* rooms);
 void PrintRoomsInfo(Room* rooms);
 void PrintRoom(Room* room);
 bool IsGraphFull(Room* rooms);
 Room* GetRandomRoom(Room* rooms);
-
-//void AddRandomConnection();
-
-//bool CanAddConnectionFrom(Room B);
-//bool ConnectionAlreadyExists(Room A, Room B);
-//void ConnectRoom(Room A, Room B);
-//bool IsSameRoom(Room A, Room B);
-
-/* reference for creating an array of pointers to structs:
- * https://stackoverflow.com/questions/15397728/c-pointer-to-array-of-pointers-to-structures-allocation-deallocation-issues
- * array for pointers to Room structs
- * 
- * REMOVE REMOVE REMOVE ?????????
- *
- */
+bool CanAddConnectionFrom(Room* B);
+bool ConnectionAlreadyExists(Room* A, Room* B);
+void ConnectRoom(Room* A, Room* B);
+bool IsSameRoom(Room* A, Room* B);
+void AddRandomConnection(Room* rooms);
+void CreateRooms(Room* rooms);
 
 //declare an array of rooms
 Room rooms[NUM_ROOMS];
@@ -47,16 +38,14 @@ int main(){
     srand(time(NULL));
     CreateRooms(rooms);
     PrintRoomsInfo(rooms);
-    Room* ptr = GetRandomRoom(rooms);
-    PrintRoom(ptr);
+
     return 0;
 }
 /***********************************************************
- * CreateRooms() - initializes the array containing 
- * pointers to room structs and returns the pointer to that
- * array
+ * InitializeRooms() - randomly assigns room names and room
+ * types
  ***********************************************************/ 
-void CreateRooms(Room *rooms){
+void InitializeRooms(Room *rooms){
     int i = 0, name_index, j;
     while(i < NUM_ROOMS){
         //initialize the number of connections to 0
@@ -130,4 +119,80 @@ Room* GetRandomRoom(Room* rooms){
     int room_number = rand() % NUM_ROOMS;
     //return address to randomly picked room
     return &rooms[room_number];
+}
+/***********************************************************
+ * CanAddConnectionFrom() - returns true if a connection can
+ * be added from Room B (< 6 outbound connections)
+ ***********************************************************/
+bool CanAddConnectionFrom(Room* B){
+    if(B->connections < MAX_CONNECT){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+/***********************************************************
+ * ConnectionAlreadyExists() - returns true if connection 
+ * from Room A and Room B already exists
+ ***********************************************************/
+bool ConnectionAlreadyExists(Room* A, Room* B){
+    int i;
+    for(i = 0; i < A->connections; i++){
+        if(A->connected_rooms[i] == B){
+            return true;
+        }
+    }
+    return false;
+}
+/***********************************************************
+ * ConnectRoom() - connects Room A to Room B
+ ***********************************************************/
+void ConnectRoom(Room* A, Room* B){
+    A->connected_rooms[A->connections++] = B;
+}
+/***********************************************************
+ * IsSameRoom() - returns true if Room A and Room B are
+ * the same room
+ ***********************************************************/
+bool IsSameRoom(Room* A, Room* B){
+    if(A == B){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+/***********************************************************
+ * AddRandomConnection() - adds a random, valid outbound 
+ * connection from a Room to another Room
+ ***********************************************************/
+void AddRandomConnection(Room* rooms){
+    Room* A;
+    Room* B;
+
+    while(true){
+        A = GetRandomRoom(rooms);
+        if(CanAddConnectionFrom(A) == true){
+            break;
+        }
+    }
+    do{
+        B = GetRandomRoom(rooms);
+    }while(CanAddConnectionFrom(B) == false || 
+           IsSameRoom(A, B) == true || 
+           ConnectionAlreadyExists(A, B) == true);
+
+    ConnectRoom(A, B);
+    ConnectRoom(B, A);
+}
+/***********************************************************
+ * CreateRooms() - assigns names and room types to room then
+ * creates the connections between the rooms
+ ***********************************************************/
+void CreateRooms(Room* rooms){
+    InitializeRooms(rooms);
+    while(!IsGraphFull(rooms)){
+        AddRandomConnection(rooms);
+    }
 }
