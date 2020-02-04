@@ -2,7 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <time.h>
+#include <unistd.h>
 
 #define NUM_ROOMS 7
 #define MIN_CONNECT 3
@@ -31,13 +34,19 @@ bool IsSameRoom(Room* A, Room* B);
 void AddRandomConnection(Room* rooms);
 void CreateRooms(Room* rooms);
 
+void CreateRoomsDirectory(char* path_of_rooms_dir);
+void MakeFilePath(Room* rooms, char* path_of_rooms_dir);
+void CreateRoomFiles(Room* rooms);
+
 //declare an array of rooms
 Room rooms[NUM_ROOMS];
+//
+char path_of_rooms_dir[128];
 
 int main(){
     srand(time(NULL));
     CreateRooms(rooms);
-    PrintRoomsInfo(rooms);
+    CreateRoomsDirectory(path_of_rooms_dir);
     return 0;
 }
 /***********************************************************
@@ -201,4 +210,33 @@ void CreateRooms(Room* rooms){
     while(!IsGraphFull(rooms)){
         AddRandomConnection(rooms);
     }
+}
+/***********************************************************
+ * CreateRoomsDirectory() -
+ ***********************************************************/
+void CreateRoomsDirectory(char* path_of_rooms_dir){
+    char pid_buffer[16];
+    memset(path_of_rooms_dir, '\0', sizeof(&path_of_rooms_dir));
+    memset(pid_buffer, '\0', sizeof(pid_buffer));
+    //create path for the directory for the room files
+    strcat(path_of_rooms_dir, "./sinocruc.rooms.");
+    sprintf(pid_buffer, "%d", getpid());
+    strcat(path_of_rooms_dir, pid_buffer);
+    //create actual directory for the room files
+    int dir_success = mkdir(path_of_rooms_dir, 0755);
+    if(dir_success != 0){
+        
+    }
+}
+/***********************************************************
+ * MakeFilePath() - 
+ ***********************************************************/
+void MakeFilePath(Room* rooms, char* path_of_rooms_dir){
+
+}
+/***********************************************************
+ * CreateRoomFiles() -
+ ***********************************************************/
+void CreateRoomFiles(Room* rooms){
+
 }
