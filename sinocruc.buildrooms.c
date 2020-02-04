@@ -8,7 +8,7 @@
 #define MIN_CONNECT 3
 #define MAX_CONNECT 6
 
-typedef struct{
+typedef struct Room{
     char* room_name;
     char* room_type;
     int connections; 
@@ -82,11 +82,15 @@ void InitializeRooms(Room *rooms){
  * and rooms connected 
  ***********************************************************/ 
 void PrintRoomsInfo(Room* rooms){
-    int i;
+    int i, j;
     for(i = 0; i < NUM_ROOMS; i++){
-        printf("Room %d: %s\n", i+1, rooms[i].room_name);
-        printf("  Type: %s\n", rooms[i].room_type);
-        printf("  Number Of Connections: %d\n", rooms[i].connections);
+        printf("Room %d: %s", i+1, rooms[i].room_name);
+        printf(" --- Type: %s", rooms[i].room_type);
+        printf(" --- Number Of Connections: %d\n", rooms[i].connections);
+        for(j = 0; j < rooms[i].connections; j++){
+            printf("    [%d] %s\n", j+1, rooms[i].connected_rooms[j]->room_name);
+        }
+        printf("\n");
     }
 }
 /***********************************************************
