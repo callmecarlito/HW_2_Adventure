@@ -20,7 +20,7 @@ typedef struct Room{
 } Room;
 
 //list for name of rooms to be randomly selected from
-char* rm_names[10] = {"thisroom", "LMNOP", "ThAtroom", "Empty", "KB824", 
+char* rm_names[10] = {"thisroom", "LMNOP", "ThAtroom", "Empty", "TiredZzZ", 
                    "infinity", "remember", "SPAced", "dunGEON", "onlyRoom"};
 
 void InitializeRooms(Room* rooms);
@@ -41,17 +41,13 @@ void MakeFiles(Room* rooms);
 void FreeAllocMem(Room* rooms);
 void CreateRoomFiles(Room* rooms, char* path_of_rooms_dir);
 
-
-//declare an array of rooms
-Room rooms[NUM_ROOMS];
-//
-char path_of_rooms_dir[128];
+Room rooms[NUM_ROOMS]; //declare an array of rooms
+char path_of_rooms_dir[128]; //holds path to the directory for the rooms generated
 
 int main(){
-    srand(time(NULL));
+    srand(time(0));
     CreateRooms(rooms);
     CreateRoomFiles(rooms, path_of_rooms_dir);
-    //PrintRoomsInfo(rooms);
     return 0;
 }
 /***********************************************************
@@ -60,9 +56,9 @@ int main(){
  ***********************************************************/ 
 void InitializeRooms(Room *rooms){
     int i = 0, name_index, j;
+
     while(i < NUM_ROOMS){
-        //initialize the number of connections to 0
-        rooms[i].connections = 0;
+        rooms[i].connections = 0; //initialize the number of connections to 0
         //assign room types
         if(i == 0){
             rooms[i].room_type = "START_ROOM";
@@ -73,17 +69,14 @@ void InitializeRooms(Room *rooms){
         else{
             rooms[i].room_type = "MID_ROOM";
         }
-        //randomly select name from the list of names
-        name_index = rand() % 10;
-        //check name is not already in use
-        for(j = 0; j < i; j++){
+        name_index = rand() % 10; //randomly select name from the list of names
+        for(j = 0; j < i; j++){ //check name is not already in use
             //if name is in use
             if(strcmp(rooms[j].room_name, rm_names[name_index]) == 0){
                 break;
             }
         }
-        //if j == i, means we have checked the entire list
-        if(j == i){
+        if(j == i){ //if j == i, means we have checked the entire list
             //increment i and assign name to the next room
             rooms[i++].room_name = rm_names[name_index];
         }
@@ -96,6 +89,7 @@ void InitializeRooms(Room *rooms){
  ***********************************************************/ 
 void PrintRoomsInfo(Room* rooms){
     int i, j;
+
     for(i = 0; i < NUM_ROOMS; i++){
         printf("Room %d: %s\n", i+1, rooms[i].room_name);
         printf(" Type: %s\n", rooms[i].room_type);
@@ -121,6 +115,7 @@ void PrintRoom(Room* room){
  ***********************************************************/ 
 bool IsGraphFull(Room* rooms){
     int i;
+
     for (i = 0; i < NUM_ROOMS; i++){
         //if number of room connects are NOT >= 3 or <= 6
         if(!(rooms[i].connections >= 3 && rooms[i].connections <= 6)){
@@ -135,8 +130,7 @@ bool IsGraphFull(Room* rooms){
  ***********************************************************/
 Room* GetRandomRoom(Room* rooms){
     int room_number = rand() % NUM_ROOMS;
-    //return address to randomly picked room
-    return &rooms[room_number];
+    return &rooms[room_number]; //return address to randomly picked room
 }
 /***********************************************************
  * CanAddConnectionFrom() - returns true if a connection can
@@ -156,6 +150,7 @@ bool CanAddConnectionFrom(Room* B){
  ***********************************************************/
 bool ConnectionAlreadyExists(Room* A, Room* B){
     int i;
+
     for(i = 0; i < A->connections; i++){
         //compares the pointers to the of room B
         if(A->connected_rooms[i] == B){
@@ -176,7 +171,7 @@ void ConnectRoom(Room* A, Room* B){
  * the same room
  ***********************************************************/
 bool IsSameRoom(Room* A, Room* B){
-    //compares to pointers of room A and B to see if they are the same
+    //compares pointers of room A and B to see if they are the same
     if(A == B){
         return true;
     }
@@ -223,12 +218,18 @@ void CreateRooms(Room* rooms){
  ***********************************************************/
 void CreateRoomsDirectory(char* path_of_rooms_dir){
     char pid_buffer[16];
+
     memset(path_of_rooms_dir, '\0', sizeof(&path_of_rooms_dir));
     memset(pid_buffer, '\0', sizeof(pid_buffer));
     //create path for the directory for the room files
     strcat(path_of_rooms_dir, "./sinocruc.rooms.");
     sprintf(pid_buffer, "%d", getpid());
     strcat(path_of_rooms_dir, pid_buffer);
+    //remove any potential newline chars at the end
+    int length = strlen(path_of_rooms_dir);
+    if(path_of_rooms_dir[length-1] == '\n'){
+        path_of_rooms_dir[length-1] = '0';
+    }
     //create actual directory for the room files
     int dir_success = mkdir(path_of_rooms_dir, 0755);
     if(dir_success != 0){
@@ -240,21 +241,19 @@ void CreateRoomsDirectory(char* path_of_rooms_dir){
  ***********************************************************/
 void AssignFilePaths(Room* rooms, char* path_of_rooms_dir){
     int i;
+
     for(i = 0; i < NUM_ROOMS; i++){
         char* path = malloc(128*sizeof(char));
         memset(path, '\0', sizeof(&path));
-        char pid_buffer[16];
-        memset(pid_buffer, '\0', sizeof(pid_buffer));
-
+        //cat together the different parts of the file name
         strcat(path, path_of_rooms_dir);
         strcat(path, "/");
         strcat(path, rooms[i].room_name);
         strcat(path, "_room");
-
+        //remove any potential newline chars at the end
         int length = strlen(path);
         if(path[length-1] == '\n'){
             path[length-1] = '0';
-            printf("\'\n\' removed \n");
         }
         rooms[i].room_path = path;
     }
@@ -265,18 +264,21 @@ void AssignFilePaths(Room* rooms, char* path_of_rooms_dir){
  ***********************************************************/
 void MakeFiles(Room* rooms){
     int i, j;
+
     for(i = 0; i < NUM_ROOMS; i++){
-        FILE* output_file = fopen(rooms[i].room_path, "w+");
-        if(output_file == NULL){
-            //ERROR HANDLING
+        FILE* output_file = fopen(rooms[i].room_path, "w+"); //creates and opens writeable file
+        if(output_file == NULL){ //if error opening the file
+            fprintf(stderr, "Could not open: %s\n", rooms[i].room_path);
+            exit(1);
         }
         else{
+            //print info contained in the struct to the file
             fprintf(output_file, "ROOM NAME: %s\n",rooms[i].room_name);
             for(j = 0; j < rooms[i].connections; j++){
                 fprintf(output_file, "CONNECTION %d: %s\n", j+1, rooms[i].connected_rooms[j]->room_name);
             }
             fprintf(output_file, "ROOM TYPE: %s\n", rooms[i].room_type);
-            fclose(output_file);
+            fclose(output_file); //close file once all the data has been written
         }
     }
 }
@@ -286,12 +288,14 @@ void MakeFiles(Room* rooms){
  ***********************************************************/
 void FreeAllocMem(Room* rooms){
     int i;
+    //loop through the rooms freeing the data allocated for the file paths
     for(i = 0; i < NUM_ROOMS; i++){
         free(rooms[i].room_path);
     }
 }
 /***********************************************************
- * CreateRoomFiles()
+ * CreateRoomFiles() - calls all of the functions needed to
+ * create the room files for the game
  ***********************************************************/
 void CreateRoomFiles(Room* rooms, char* path_of_rooms_dir){
     CreateRoomsDirectory(path_of_rooms_dir);
