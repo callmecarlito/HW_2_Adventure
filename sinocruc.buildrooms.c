@@ -20,8 +20,8 @@ typedef struct Room{
 } Room;
 
 //list for name of rooms to be randomly selected from
-char* rm_names[10] = {"thisroom", "LMNOP", "ThAtroom", "Empty", "TiredZzZ", 
-                   "infinity", "remember", "SPAced", "dunGEON", "onlyRoom"};
+char* rm_names[10] = {"hmphf", "LMNOP", "Coffee", "Empty", "TiredZz", 
+                   "infinite", "NrG", "SPAced", "dnGEON", "ARoom"};
 
 void InitializeRooms(Room* rooms);
 void PrintRoomsInfo(Room* rooms);
