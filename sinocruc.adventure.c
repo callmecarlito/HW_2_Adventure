@@ -14,16 +14,18 @@
 
 typedef struct Room{
     char* room_name;
-    char* room_type;
-    int connections; 
+    int connections;
+    char* list_of_connecting_rooms[MAX_CONNECT]; 
     struct Room* connected_rooms[MAX_CONNECT];
-    char* room_path;
+    char* room_type;
 } Room;
 
 void FindNewestRooms(char* path_of_rooms_dir);
 void GetRoomData(Room* rooms, char* path_of_rooms_dir);
 void ConnectRooms(Room* rooms);
 void CreateGameRooms(Room* rooms, char* path_of_rooms_dir);
+void PrintRoomsInfo(Room* rooms);
+void FreeAllocMem(Room* rooms);
 
 Room rooms[NUM_ROOMS];
 char path_of_rooms_dir[128];
@@ -31,7 +33,8 @@ char path_of_rooms_dir[128];
 int main(){
     FindNewestRooms(path_of_rooms_dir);
     GetRoomData(rooms, path_of_rooms_dir);
-    
+    PrintRoomsInfo(rooms);
+    FreeAllocMem(rooms);
     return 0;
 }
 /***********************************************************
@@ -68,7 +71,6 @@ void FindNewestRooms(char* path_of_rooms_dir){
  * GetRoomData() - 
  ***********************************************************/
 void GetRoomData(Room* rooms, char* path_of_rooms_dir){
-    int room_number = 0;
     DIR* current_dir; //
     struct dirent* dir_entry; //
     FILE* file_in_dir;
@@ -85,21 +87,56 @@ void GetRoomData(Room* rooms, char* path_of_rooms_dir){
         perror("Unable to change working directory: ");
         exit(1);
     }
+
+    int room_number = 0;
+
     while( (dir_entry = readdir(current_dir)) != NULL){ //iterates through the entries in current_dir
         //skips over "." and ".."
         if (strcmp(dir_entry->d_name,".") == 0 || 
             strcmp(dir_entry->d_name, "..") == 0){
                 continue;
-            }
+        }
         //from the new working directory call fopen to open the file
         file_in_dir = fopen(dir_entry->d_name, "r");
         if(file_in_dir == NULL){
             perror("Error opening room file: ");
             exit(1);
         }
-        
-        //printf("OPENED: %s\n", dir_entry->d_name);
+        int connection_number = 0;
+        char str[32];
+        memset(str, '\0', sizeof(str));
+        while( (fgets(str, sizeof(str), file_in_dir)) != NULL){
+            char* parsed_text;
+            parsed_text = strtok(str, " ");
+            while(parsed_text != NULL){
+                if(strcmp(parsed_text, "NAME:") == 0){
+                   parsed_text = strtok(NULL, " "); 
+                   rooms[room_number].room_name = malloc(sizeof(char)*16);
+                   memset(rooms[room_number].room_name, '\0', sizeof(rooms[room_number].room_name));
+                   strcpy(rooms[room_number].room_name, parsed_text);
+                }
+                if(strcmp(parsed_text, "CONNECTION") == 0){
+                    parsed_text = strtok(NULL, " ");
+                    parsed_text = strtok(NULL, " ");
+                    //printf("[CONNECTION] %s\n", parsed_text);
+                    //rooms[room_number].connected_rooms[connection_number]->room_name = malloc(sizeof(char)*16);
+                    //memset(rooms[room_number].connected_rooms[connection_number]->room_name, '\0', sizeof(rooms[room_number].connected_rooms[connection_number]->room_name));
+                    //strcpy(rooms[room_number].connected_rooms[connection_number]->room_name, parsed_text);
+                    rooms[room_number].list_of_connecting_rooms[connection_number] = malloc(sizeof(char)*16);
+                    memset(rooms[room_number].list_of_connecting_rooms[connection_number], '\0', sizeof(rooms[room_number].list_of_connecting_rooms[connection_number]));
+                    strcpy(rooms[room_number].list_of_connecting_rooms[connection_number], parsed_text);
+                    connection_number++;
+                }
+                if(strcmp(parsed_text, "TYPE:") == 0){
+                    parsed_text = strtok(NULL, " ");
+                    //printf("[TYPE] %s\n", parsed_text);
+                }
+                parsed_text = strtok(NULL, " ");
+            }
+        }
+        rooms[room_number].connections = connection_number; 
         fclose(file_in_dir);
+        room_number++;
     }
     closedir(current_dir);
 }
@@ -116,6 +153,35 @@ void CreateGameRooms(Room* rooms, char* path_of_rooms_dir){
     FindNewestRooms(path_of_rooms_dir);
     GetRoomData(rooms, path_of_rooms_dir);
     ConnectRooms(rooms);
+}
+/***********************************************************
+ * PrintRoomsInfo() - iterates through the array of rooms
+ * and prints the room name, type, number of connections, 
+ * and rooms connected.  
+ ***********************************************************/ 
+void PrintRoomsInfo(Room* rooms){
+    int i, j;
+
+    for(i = 0; i < NUM_ROOMS; i++){
+        printf("Room %d: %s", i+1, rooms[i].room_name);
+        printf("Connections: %d\n", rooms[i].connections);
+        for(j = 0; j < rooms[i].connections; j++){
+            printf("    [%d] %s", j+1, rooms[i].list_of_connecting_rooms[j]);
+        }
+    }
+}
+/***********************************************************
+ * 
+ ***********************************************************/
+void FreeAllocMem(Room* rooms){
+    int i, j;
+
+    for(i = 0; i < NUM_ROOMS; i++){
+        free(rooms[i].room_name);
+        for(j = 0; j < rooms[i].connections; j++){
+            free(rooms[i].list_of_connecting_rooms[j]);
+        }
+    }
 }
 /***********************************************************
  * 
