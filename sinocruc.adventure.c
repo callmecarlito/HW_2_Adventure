@@ -106,30 +106,33 @@ void GetRoomData(Room* rooms, char* path_of_rooms_dir){
         char str[32];
         memset(str, '\0', sizeof(str));
         while( (fgets(str, sizeof(str), file_in_dir)) != NULL){
+            int length = strlen(str);
+            if(length > 0 && str[length - 1] == '\n'){
+                str[length - 1] = '\0';
+            }
             char* parsed_text;
             parsed_text = strtok(str, " ");
             while(parsed_text != NULL){
                 if(strcmp(parsed_text, "NAME:") == 0){
                    parsed_text = strtok(NULL, " "); 
                    rooms[room_number].room_name = malloc(sizeof(char)*16);
-                   memset(rooms[room_number].room_name, '\0', sizeof(rooms[room_number].room_name));
+                   memset(rooms[room_number].room_name, '\0', sizeof(*rooms[room_number].room_name));
                    strcpy(rooms[room_number].room_name, parsed_text);
                 }
                 if(strcmp(parsed_text, "CONNECTION") == 0){
                     parsed_text = strtok(NULL, " ");
                     parsed_text = strtok(NULL, " ");
-                    //printf("[CONNECTION] %s\n", parsed_text);
-                    //rooms[room_number].connected_rooms[connection_number]->room_name = malloc(sizeof(char)*16);
-                    //memset(rooms[room_number].connected_rooms[connection_number]->room_name, '\0', sizeof(rooms[room_number].connected_rooms[connection_number]->room_name));
-                    //strcpy(rooms[room_number].connected_rooms[connection_number]->room_name, parsed_text);
                     rooms[room_number].list_of_connecting_rooms[connection_number] = malloc(sizeof(char)*16);
-                    memset(rooms[room_number].list_of_connecting_rooms[connection_number], '\0', sizeof(rooms[room_number].list_of_connecting_rooms[connection_number]));
+                    memset(rooms[room_number].list_of_connecting_rooms[connection_number], '\0', sizeof(*rooms[room_number].list_of_connecting_rooms[connection_number]));
                     strcpy(rooms[room_number].list_of_connecting_rooms[connection_number], parsed_text);
                     connection_number++;
                 }
                 if(strcmp(parsed_text, "TYPE:") == 0){
                     parsed_text = strtok(NULL, " ");
                     //printf("[TYPE] %s\n", parsed_text);
+                    rooms[room_number].room_type = malloc(sizeof(char)*16);
+                    memset(rooms[room_number].room_type, '\0', sizeof(*rooms[room_number].room_type));
+                    strcpy(rooms[room_number].room_type, parsed_text);
                 }
                 parsed_text = strtok(NULL, " ");
             }
@@ -163,11 +166,12 @@ void PrintRoomsInfo(Room* rooms){
     int i, j;
 
     for(i = 0; i < NUM_ROOMS; i++){
-        printf("Room %d: %s", i+1, rooms[i].room_name);
+        printf("Room %d: %s\n", i+1, rooms[i].room_name);
         printf("Connections: %d\n", rooms[i].connections);
         for(j = 0; j < rooms[i].connections; j++){
-            printf("    [%d] %s", j+1, rooms[i].list_of_connecting_rooms[j]);
+            printf("    [%d] %s\n", j+1, rooms[i].list_of_connecting_rooms[j]);
         }
+        printf("Type: %s\n", rooms[i].room_type);
     }
 }
 /***********************************************************
@@ -181,6 +185,7 @@ void FreeAllocMem(Room* rooms){
         for(j = 0; j < rooms[i].connections; j++){
             free(rooms[i].list_of_connecting_rooms[j]);
         }
+        free(rooms[i].room_type);
     }
 }
 /***********************************************************
