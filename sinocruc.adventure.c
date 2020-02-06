@@ -88,7 +88,7 @@ void GetRoomData(Room* rooms, char* path_of_rooms_dir){
         exit(1);
     }
 
-    int room_number = 0;
+    int room_number = 0; //index for room number in rooms array
 
     while( (dir_entry = readdir(current_dir)) != NULL){ //iterates through the entries in current_dir
         //skips over "." and ".."
@@ -102,49 +102,57 @@ void GetRoomData(Room* rooms, char* path_of_rooms_dir){
             perror("Error opening room file: ");
             exit(1);
         }
-        int connection_number = 0;
-        char str[32];
-        memset(str, '\0', sizeof(str));
-        while( (fgets(str, sizeof(str), file_in_dir)) != NULL){
+
+        int connection_number = 0; //index for connecting room for array of list_of_connecting_rooms
+        char str[32]; //buffer for line read by fgets
+        memset(str, '\0', sizeof(str)); //clears memory space for buffer
+
+        while( (fgets(str, sizeof(str), file_in_dir)) != NULL){ //reads 1 line at a time from the file
+            
             int length = strlen(str);
+            //removes newline character captured by fgets and changes it to a null terminator
             if(length > 0 && str[length - 1] == '\n'){
                 str[length - 1] = '\0';
             }
             char* parsed_text;
-            parsed_text = strtok(str, " ");
+            parsed_text = strtok(str, " "); //using strtok to parse the line of text read into str
             while(parsed_text != NULL){
+                //when parsed text contains "NAME:" the next value will contain the value to be added to the struct
                 if(strcmp(parsed_text, "NAME:") == 0){
-                   parsed_text = strtok(NULL, " "); 
-                   rooms[room_number].room_name = malloc(sizeof(char)*16);
-                   memset(rooms[room_number].room_name, '\0', sizeof(*rooms[room_number].room_name));
-                   strcpy(rooms[room_number].room_name, parsed_text);
+                   parsed_text = strtok(NULL, " ");  //call strtok to get the value for name
+                   rooms[room_number].room_name = malloc(sizeof(char)*16); //allocate memory for the string
+                   memset(rooms[room_number].room_name, '\0', sizeof(*rooms[room_number].room_name)); //clear allocated memory
+                   strcpy(rooms[room_number].room_name, parsed_text); //copy name to room_name of struct
                 }
+                //when parsed text contains "CONNECTION" the value for the name of the connecting room is coming up
                 if(strcmp(parsed_text, "CONNECTION") == 0){
                     parsed_text = strtok(NULL, " ");
-                    parsed_text = strtok(NULL, " ");
-                    rooms[room_number].list_of_connecting_rooms[connection_number] = malloc(sizeof(char)*16);
+                    parsed_text = strtok(NULL, " "); //strtok called twice to skip over the middle term and obtain the actual value of the room name
+                    rooms[room_number].list_of_connecting_rooms[connection_number] = malloc(sizeof(char)*16); //allocate memory for the string
                     memset(rooms[room_number].list_of_connecting_rooms[connection_number], '\0', sizeof(*rooms[room_number].list_of_connecting_rooms[connection_number]));
-                    strcpy(rooms[room_number].list_of_connecting_rooms[connection_number], parsed_text);
-                    connection_number++;
+                    strcpy(rooms[room_number].list_of_connecting_rooms[connection_number], parsed_text); //copy name into the array of pointers
+                    connection_number++; //increment the number of connections - value will later be added to the struct
                 }
+                //when parsed text contains "TYPE:" the next value will contain the value to be added to the struct
                 if(strcmp(parsed_text, "TYPE:") == 0){
-                    parsed_text = strtok(NULL, " ");
-                    //printf("[TYPE] %s\n", parsed_text);
-                    rooms[room_number].room_type = malloc(sizeof(char)*16);
+                    parsed_text = strtok(NULL, " "); //call strtok to get the next part of the string
+                    rooms[room_number].room_type = malloc(sizeof(char)*16); //allocate memory for the string
                     memset(rooms[room_number].room_type, '\0', sizeof(*rooms[room_number].room_type));
-                    strcpy(rooms[room_number].room_type, parsed_text);
+                    strcpy(rooms[room_number].room_type, parsed_text); //copy parsed string into the room_type variable
                 }
                 parsed_text = strtok(NULL, " ");
             }
         }
-        rooms[room_number].connections = connection_number; 
-        fclose(file_in_dir);
-        room_number++;
+        rooms[room_number].connections = connection_number; //adds the total number of rooms to the struct
+        fclose(file_in_dir); //close current file as reading from the file is complete
+        room_number++; //increment room_number to store data in the next element containing the next room struct
     }
-    closedir(current_dir);
+    closedir(current_dir); //close directory once all files have been read from
 }
 /***********************************************************
- * ConnectRooms() -
+ * ConnectRooms() - using the names found in the array 
+ * list_of_connecting_rooms. we'll build conections using 
+ * pointers and add those pointers to an additional array
  ***********************************************************/
 void ConnectRooms(Room* rooms){
 
