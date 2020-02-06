@@ -75,15 +75,33 @@ void GetRoomData(Room* rooms, char* path_of_rooms_dir){
 
     current_dir = opendir(path_of_rooms_dir); //open newest rooms directory
     if(current_dir == NULL){ //check if there was a failure opening the directory
-        perror("Unable to get room data - Error opening directory");
+        perror("Unable to get room data - Error opening directory: ");
         exit(1);
     }
-    printf("%s\n", path_of_rooms_dir);
-    while( (dir_entry = readdir(current_dir)) != NULL){
-        printf("%s\n", dir_entry->d_name);
+    //changed working directory in order to get fopen() to function properly 
+    //without needing the entire file path of the files
+    int change_dir = chdir(path_of_rooms_dir);
+    if(change_dir != 0){
+        perror("Unable to change working directory: ");
+        exit(1);
+    }
+    while( (dir_entry = readdir(current_dir)) != NULL){ //iterates through the entries in current_dir
+        //skips over "." and ".."
+        if (strcmp(dir_entry->d_name,".") == 0 || 
+            strcmp(dir_entry->d_name, "..") == 0){
+                continue;
+            }
+        //from the new working directory call fopen to open the file
+        file_in_dir = fopen(dir_entry->d_name, "r");
+        if(file_in_dir == NULL){
+            perror("Error opening room file: ");
+            exit(1);
+        }
+        
+        //printf("OPENED: %s\n", dir_entry->d_name);
+        fclose(file_in_dir);
     }
     closedir(current_dir);
-
 }
 /***********************************************************
  * ConnectRooms() -
