@@ -31,8 +31,7 @@ Room rooms[NUM_ROOMS];
 char path_of_rooms_dir[128];
 
 int main(){
-    FindNewestRooms(path_of_rooms_dir);
-    GetRoomData(rooms, path_of_rooms_dir);
+    CreateGameRooms(rooms, path_of_rooms_dir);
     PrintRoomsInfo(rooms);
     FreeAllocMem(rooms);
     return 0;
@@ -155,7 +154,18 @@ void GetRoomData(Room* rooms, char* path_of_rooms_dir){
  * pointers and add those pointers to an additional array
  ***********************************************************/
 void ConnectRooms(Room* rooms){
+    int i, j, k;
 
+    for(i = 0; i < NUM_ROOMS; i++){ //for each room
+        for(j = 0; j < rooms[i].connections; j++){ //iterate through each name in list_of_connections
+            for(k = 0; k < NUM_ROOMS; k++){
+                if(strcmp(rooms[i].list_of_connecting_rooms[j], rooms[k].room_name) == 0){
+                    //printf("%s : %s\n", rooms[i].connected_rooms[j], rooms[k].room_name);
+                    rooms[i].connected_rooms[j] = &rooms[k];
+                }
+            }
+        }
+    }
 }
 /***********************************************************
  * CreateGameROoms() 
@@ -176,14 +186,20 @@ void PrintRoomsInfo(Room* rooms){
     for(i = 0; i < NUM_ROOMS; i++){
         printf("Room %d: %s\n", i+1, rooms[i].room_name);
         printf("Connections: %d\n", rooms[i].connections);
+        //prints connecting rooms via array of strings created by GetRoomData()
+        //for(j = 0; j < rooms[i].connections; j++){
+        //    printf("    [%d] %s\n", j+1, rooms[i].list_of_connecting_rooms[j]);
+        //}
+        //prints connecting rooms via array of pointers to room structs created by ConnectRooms()
         for(j = 0; j < rooms[i].connections; j++){
-            printf("    [%d] %s\n", j+1, rooms[i].list_of_connecting_rooms[j]);
+            printf("    [%d] %s\n", j+1, rooms[i].connected_rooms[j]->room_name);
         }
         printf("Type: %s\n", rooms[i].room_type);
     }
 }
 /***********************************************************
- * 
+ * FreeAllocMem() - frees the memory allocated from 
+ * GetRoomData()
  ***********************************************************/
 void FreeAllocMem(Room* rooms){
     int i, j;
