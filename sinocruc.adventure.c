@@ -11,6 +11,7 @@
 #define NUM_ROOMS 7
 #define MIN_CONNECT 3
 #define MAX_CONNECT 6
+#define MAX_STEPS 250
 
 typedef struct Room{
     char* room_name;
@@ -27,12 +28,17 @@ void CreateGameRooms(Room* rooms, char* path_of_rooms_dir);
 void PrintRoomsInfo(Room* rooms);
 void FreeAllocMem(Room* rooms);
 
-Room rooms[NUM_ROOMS];
-char path_of_rooms_dir[128];
+void DisplayPrompt(Room* current_room);
+Room* InitializeStartRoom(Room* rooms);
+void StartAdventure(Room* rooms);
+
+Room rooms[NUM_ROOMS]; //array of room structs containing data from room files
+char path_of_rooms_dir[128]; //used to store the path of the most recently modified rooms directory
 
 int main(){
     CreateGameRooms(rooms, path_of_rooms_dir);
-    PrintRoomsInfo(rooms);
+    //PrintRoomsInfo(rooms);
+    StartAdventure(rooms);
     FreeAllocMem(rooms);
     return 0;
 }
@@ -195,6 +201,7 @@ void PrintRoomsInfo(Room* rooms){
             printf("    [%d] %s\n", j+1, rooms[i].connected_rooms[j]->room_name);
         }
         printf("Type: %s\n", rooms[i].room_type);
+        printf("\n");
     }
 }
 /***********************************************************
@@ -213,5 +220,49 @@ void FreeAllocMem(Room* rooms){
     }
 }
 /***********************************************************
- * 
+ * StartAdventure() - begins and controls the game play
  ***********************************************************/
+void StartAdventure(Room* rooms){
+    int num_steps = 0;
+    Room* rooms_visited[250]; //array of pointers to rooms used to record the user's path
+    Room* current_room = InitializeStartRoom(rooms);
+
+    DisplayPrompt(current_room);
+    //GetUserInput()
+    //ValidateUserInput()
+    //MoveToRoom()
+    //IsEndRoom()
+    //PrintPath()
+}
+/***********************************************************
+ * DisplayPrompt() - displays prompt to the user stating 
+ * the current location, possible rooms to explore next, 
+ * and prompts user for input
+ ***********************************************************/
+void DisplayPrompt(Room* current_room){
+    int i;
+    printf("CURRENT LOCATION: %s\n", current_room->room_name);
+    printf("POSSIBLE CONNECTIONS: ");
+    for(i = 0; i < current_room->connections; i++){
+        if(i == (current_room->connections - 1)){
+            printf("%s.\n", current_room->connected_rooms[i]->room_name);
+        }
+        else{
+            printf("%s, ", current_room->connected_rooms[i]->room_name);
+        }
+    }
+    printf("WHERE TO? >");    
+}
+/***********************************************************
+ * InitializeStartRoom() -  returns a pointer to the
+ * START_ROOM
+ ***********************************************************/
+Room* InitializeStartRoom(Room* rooms){
+    int i;
+    for(i = 0; i < NUM_ROOMS; i++){
+        if(strcmp(rooms[i].room_type, "START_ROOM") ==0){
+            return &rooms[i];
+        }
+    }
+    return NULL;
+}
