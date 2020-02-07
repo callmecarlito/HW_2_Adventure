@@ -1,4 +1,5 @@
 #include <dirent.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -35,9 +36,13 @@ void DisplayPrompt(Room* current_room);
 void GetUserInput(char* user_input);
 Room* ValidateStep(Room* current_room, char* user_input);
 void PrintPath(Room* rooms_visited[], int num_steps);
+void* WriteTimeToFile(void* ptr);
+void ReadTimeFromFile();
 
 Room rooms[NUM_ROOMS]; //array of room structs containing data from room files
 char path_of_rooms_dir[128]; //used to store the path of the most recently modified rooms directory
+
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 int main(){
     CreateGameRooms(rooms, path_of_rooms_dir);
@@ -316,6 +321,20 @@ Room* ValidateStep(Room* current_room, char* user_input){
             return current_room->connected_rooms[i];
         }
     }
+    //if user input is time
+    if(strcmp(user_input, "time") == 0){
+        pthread_t child_thread;
+        int err;
+        err = pthread_create(&child_thread, NULL, WriteTimeToFile, NULL);
+        if(err != 0){
+            perror("Unable to create thread: ");
+            exit(1);
+        }
+        pthread_join(child_thread, NULL); //causes parent thread to wait for child to finish
+        //WRITE TO FILE
+
+        //READ FROM FILE
+    }
     printf("HUH? I DON’T UNDERSTAND THAT ROOM. TRY AGAIN.\n\n");
     return NULL;
 }
@@ -329,4 +348,22 @@ void PrintPath(Room* rooms_visited[], int num_steps){
     for(i = 0; i < num_steps; i++){
         printf("%s\n", rooms_visited[i]->room_name);
     }
+}
+/***********************************************************
+ * 
+ ***********************************************************/
+void* WriteTimeToFile(void* ptr){
+    pthread_mutex_lock(&lock);
+
+    pthread_mutex_unlock(&lock);
+    //return;
+}
+/***********************************************************
+ *  
+ ***********************************************************/
+void ReadTimeFromFile(){
+    pthread_mutex_lock(&lock);
+
+    pthread_mutex_unlock(&lock);
+    //return;
 }
