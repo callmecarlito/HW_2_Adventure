@@ -27,10 +27,14 @@ void ConnectRooms(Room* rooms);
 void CreateGameRooms(Room* rooms, char* path_of_rooms_dir);
 void PrintRoomsInfo(Room* rooms);
 void FreeAllocMem(Room* rooms);
-
-void DisplayPrompt(Room* current_room);
-Room* InitializeStartRoom(Room* rooms);
 void StartAdventure(Room* rooms);
+Room* InitializeStartRoom(Room* rooms);
+bool GameOver(Room* current_room);
+Room* GetNextRoom(Room* current_room);
+void DisplayPrompt(Room* current_room);
+void GetUserInput(char* user_input);
+Room* ValidateStep(Room* current_room, char* user_input);
+void PrintPath(Room* rooms_visited[], int num_steps);
 
 Room rooms[NUM_ROOMS]; //array of room structs containing data from room files
 char path_of_rooms_dir[128]; //used to store the path of the most recently modified rooms directory
@@ -166,7 +170,7 @@ void ConnectRooms(Room* rooms){
         for(j = 0; j < rooms[i].connections; j++){ //iterate through each name in list_of_connections
             for(k = 0; k < NUM_ROOMS; k++){
                 if(strcmp(rooms[i].list_of_connecting_rooms[j], rooms[k].room_name) == 0){
-                    //printf("%s : %s\n", rooms[i].connected_rooms[j], rooms[k].room_name);
+                    //printf("%s : %s\n", rooms[i].list_of_connecting_rooms[j], rooms[k].room_name);
                     rooms[i].connected_rooms[j] = &rooms[k];
                 }
             }
@@ -227,12 +231,51 @@ void StartAdventure(Room* rooms){
     Room* rooms_visited[250]; //array of pointers to rooms used to record the user's path
     Room* current_room = InitializeStartRoom(rooms);
 
-    DisplayPrompt(current_room);
-    //GetUserInput()
-    //ValidateUserInput()
-    //MoveToRoom()
-    //IsEndRoom()
-    //PrintPath()
+    do{
+        Room* next_room = GetNextRoom(current_room);
+        rooms_visited[num_steps] = next_room;
+        num_steps++;
+        current_room = next_room;
+    }while(!GameOver(current_room));
+    printf("CONGRATULATIONS!!! YOU'VE REACHED THE END.\n");
+    PrintPath(rooms_visited, num_steps);
+}
+/***********************************************************
+ * InitializeStartRoom() -  returns a pointer to the
+ * START_ROOM
+ ***********************************************************/
+Room* InitializeStartRoom(Room* rooms){
+    int i;
+    for(i = 0; i < NUM_ROOMS; i++){
+        if(strcmp(rooms[i].room_type, "START_ROOM") ==0){
+            return &rooms[i];
+        }
+    }
+    return NULL;
+}
+/***********************************************************
+ * GameOver() - checks room_type of current_room, returns
+ * true if type is END_ROOM
+ ***********************************************************/
+bool GameOver(Room* current_room){
+    if(strcmp(current_room->room_type, "END_ROOM") == 0){
+        return true;
+    }
+    return false;
+}
+/***********************************************************
+ * GetNextRoom() - after prompting, then validating user 
+ * input, returns a pointer to the next room
+ ***********************************************************/
+Room* GetNextRoom(Room* current_room){
+    char user_input[128];
+    Room* next_room = NULL;
+    do{
+        DisplayPrompt(current_room);
+        GetUserInput(user_input);
+        next_room = ValidateStep(current_room, user_input);
+    }while(next_room == NULL);
+    return next_room;
 }
 /***********************************************************
  * DisplayPrompt() - displays prompt to the user stating 
@@ -254,15 +297,36 @@ void DisplayPrompt(Room* current_room){
     printf("WHERE TO? >");    
 }
 /***********************************************************
- * InitializeStartRoom() -  returns a pointer to the
- * START_ROOM
+ * GetUserInput() - gets user input
  ***********************************************************/
-Room* InitializeStartRoom(Room* rooms){
+void GetUserInput(char* user_input){
+    memset(user_input, '\0', sizeof(*user_input));
+    scanf("%s", user_input);
+    printf("\n");
+}
+/***********************************************************
+ * ValidateStep - compares user_input to the connections 
+ * available to the current_room, returns pointer to the room
+ * if there's a match, otherwise returns NULL
+ ***********************************************************/
+Room* ValidateStep(Room* current_room, char* user_input){
     int i;
-    for(i = 0; i < NUM_ROOMS; i++){
-        if(strcmp(rooms[i].room_type, "START_ROOM") ==0){
-            return &rooms[i];
+    for(i = 0; i < current_room->connections; i++){
+        if(strcmp(current_room->connected_rooms[i]->room_name, user_input) == 0){
+            return current_room->connected_rooms[i];
         }
     }
+    printf("HUH? I DON’T UNDERSTAND THAT ROOM. TRY AGAIN.\n\n");
     return NULL;
+}
+/***********************************************************
+ * PrintPath() - prints path taken by the user to reach
+ * the END_ROOM as well as the number of steps 
+ ***********************************************************/
+void PrintPath(Room* rooms_visited[], int num_steps){
+    int i;
+    printf("YOU TOOK %d STEPS. YOUR PATH TO VICTORY WAS:\n", num_steps);
+    for(i = 0; i < num_steps; i++){
+        printf("%s\n", rooms_visited[i]->room_name);
+    }
 }
