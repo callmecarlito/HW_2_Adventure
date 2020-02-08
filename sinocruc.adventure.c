@@ -161,6 +161,12 @@ void GetRoomData(Room* rooms, char* path_of_rooms_dir){
         fclose(file_in_dir); //close current file as reading from the file is complete
         room_number++; //increment room_number to store data in the next element containing the next room struct
     }
+    //change directory pack to parent directory
+    change_dir = chdir("..");
+    if(change_dir != 0){
+        perror("Unable to change working directory: ");
+        exit(1);
+    }
     closedir(current_dir); //close directory once all files have been read from
 }
 /***********************************************************
@@ -331,11 +337,11 @@ Room* ValidateStep(Room* current_room, char* user_input){
             exit(1);
         }
         pthread_join(child_thread, NULL); //causes parent thread to wait for child to finish
-        //WRITE TO FILE
-
-        //READ FROM FILE
+        //ReadTimeFromFile();
     }
-    printf("HUH? I DON’T UNDERSTAND THAT ROOM. TRY AGAIN.\n\n");
+    else{
+        printf("HUH? I DON’T UNDERSTAND THAT ROOM. TRY AGAIN.\n\n");
+    }
     return NULL;
 }
 /***********************************************************
@@ -353,16 +359,45 @@ void PrintPath(Room* rooms_visited[], int num_steps){
  * 
  ***********************************************************/
 void* WriteTimeToFile(void* ptr){
-    pthread_mutex_lock(&lock);
+    pthread_mutex_lock(&lock); //lock mutex to prevent other threads accessing file while writing occurs
+    time_t t; 
+    struct tm *tmp; 
+    char the_time[64]; 
+    
+    time(&t);
+    tmp = localtime(&t);     
 
-    pthread_mutex_unlock(&lock);
-    //return;
+    FILE* output_file = fopen("currentTime.txt", "w");
+    if(output_file == NULL){
+        fprintf(stderr, "Could not open: \"currentTime.txt\"\n");
+        exit(1);
+    }
+    // using strftime to display time 
+    strftime(the_time, sizeof(the_time), "%I:%M%P, %A, %B %d, %Y\n", tmp);
+    fprintf(output_file, the_time); //write time, day, date to file 
+    //printf("%s", the_time);
+    fclose(output_file);
+    pthread_mutex_unlock(&lock); //unlock mutex to allow other threads to access file
+    return NULL;
 }
 /***********************************************************
  *  
  ***********************************************************/
 void ReadTimeFromFile(){
     pthread_mutex_lock(&lock);
+
+    char the_time[64]; //buffer for line read by fgets
+    memset(the_time, '\0', sizeof(the_time)); //clears memory space for buffer
+
+    FILE* output_file = fopen("currentTime.txt", "w");
+    if(output_file == NULL){
+        fprintf(stderr, "Could not open: \"currentTime.txt\"\n");
+        exit(1);
+    }
+    
+    if(fgets(the_time, sizeof(the_time), output_file) != NULL){
+        printf("%s\n", the_time);
+    }
 
     pthread_mutex_unlock(&lock);
     //return;
