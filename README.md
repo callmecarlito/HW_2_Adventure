@@ -39,7 +39,29 @@ adventure game. The user will begin one of the rooms and must navigate to find t
         ROOM TYPE: <room type>
      ```
 ### The Game `sinocruc.adventure.c`
+1. Reads the room data generated above into the program
+2. Should use the most recently generated set of files
+   - use the `stat()` function call to find the directory with the most recent `st_mtime` value from the returned `stat` struct
+3. Provides gameplay interface which tells the player their current location, possible outbound connections, and a prompt
+   ```
+      CURRENT LOCATION: XYZZY
+      POSSIBLE CONNECTIONS: PLOVER, Dungeon, twisty.
+      WHERE TO? > 
+   ```
+   - the user can then enter the name of the next room they choose and then re-prompted 
+   ```
+      CURRENT LOCATION: XYZZY
+      POSSIBLE CONNECTIONS: PLOVER, Dungeon, twisty.
+      WHERE TO? >twisty
 
+      CURRENT LOCATION: twisty
+      POSSIBLE CONNECTIONS: PLOVER, XYZZY, Dungeon, PLUGH.
+      WHERE TO? >
+   ```
+   - if the user enters an invalid room name, an error message should be produced and then prompt the user again
+4. The program should keep track of the number of steps taken by the user to reach the end room as well as the path taken
+   - invalid room selections should not be counted nor tracked in the history
+5. Once the user reaches the end room
 ## compiling and running
 Make sure all files are contained within the same directory. To compile the program, navigate to the program directory from your terminal.
 Once you are there type "make all" followed by enter key. Once complete, two executable files should appear: `sinocruc.buildrooms.out` and 
