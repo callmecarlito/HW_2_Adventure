@@ -61,8 +61,24 @@ adventure game. The user will begin one of the rooms and must navigate to find t
    - if the user enters an invalid room name, an error message should be produced and then prompt the user again
 4. The program should keep track of the number of steps taken by the user to reach the end room as well as the path taken
    - invalid room selections should not be counted nor tracked in the history
-5. Once the user reaches the end room
-## compiling and running
+5. Once the user reaches the end room:
+   - they receive a congratulatory message 
+   - output the path taken (not including the start room)
+   - output the number of steps taken
+   - then exit (make sure to set exit status code to 0)
+6. Time Keeping
+   - the program must also be able to return the current time of day
+     - must utilize a second thread and mutex(es)
+       - use the classic pthread library to accomplish this simple multithreading
+         - remember to use `-lpthread` compile option switch
+   - when the player enters `time` at the game prompt, the second thread must write the current time to a file called `currentTime.txt` located
+     in the same directory as the program
+     - use `strftime()` for the formatting
+   - the main thread will then read this time value from the file and print it out to the user
+     - the mutex will be used to control the execution between the two threads
+   - any additional calls for time by the user should simply overwrite the data in the `currentTime.txt` file
+
+## Compiling and Running
 Make sure all files are contained within the same directory. To compile the program, navigate to the program directory from your terminal.
 Once you are there type "make all" followed by enter key. Once complete, two executable files should appear: `sinocruc.buildrooms.out` and 
 `sinocruc.adventure.out`. First begin by running the buildrooms program, if successful, a new subdirectory should be created containing the 
