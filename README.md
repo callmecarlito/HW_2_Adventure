@@ -2,6 +2,8 @@
 
 
 ## Files
+1. sinocruc.buildrooms.c
+2. sinocruc.adventure.c
 
 ## Features
 
