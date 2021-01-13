@@ -13,7 +13,7 @@ adventure game. The user will begin one of the rooms and must navigate to find t
    
 ## Requirements
 ### Rooms Program `sinocruc.buildrooms.c`
-    - creates a subdirectory    
+ - creates a subdirectory    
 ### The Game `sinocruc.adventure.c`
 
 ## compiling and running
