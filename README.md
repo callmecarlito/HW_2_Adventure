@@ -1,15 +1,20 @@
 # Text Adventure Game
-This 
+This game is comprised of two different programs. The first, generates the rooms and the game environment layout. The second, runs the actual 
+adventure game. The user will begin one of the rooms and must navigate to find the end room.  
 
 ## Files
 1. sinocruc.buildrooms.c
    - generates a subdirectory containing a series of files representing the rooms for the game. Each file will contain a description of the 
      room including the rooms connected to it
-   - each time this program is executed
+   - each time this program is executed a new subdirectory is created with a different series of files
 2. sinocruc.adventure.c
-   - provides the interface for playing the game
+   - provides the interface for playing the game using the most recently generated subdirectory containing the room files
+3. Makefile
    
 ## Requirements
+### Rooms Program `sinocruc.buildrooms.c`
+    - creates a subdirectory    
+### The Game `sinocruc.adventure.c`
 
 ## compiling and running
 Make sure all files are contained within the same directory. To compile the program, navigate to the program directory from your terminal.
