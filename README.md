@@ -1,14 +1,14 @@
 # Text Adventure Game
-
+This 
 
 ## Files
 1. sinocruc.buildrooms.c
-   - asd
+   - generates a subdirectory containing a series of files representing the rooms for the game. Each file will contain a description of the 
+     room including the rooms connected to it
+   - each time this program is executed
 2. sinocruc.adventure.c
-   - asd
-
-## Features
-
+   - provides the interface for playing the game
+   
 ## Requirements
 
 ## compiling and running
